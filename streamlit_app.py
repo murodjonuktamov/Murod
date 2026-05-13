@@ -1,26 +1,23 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
+import ee
+import geemap.foliumap as geemap
 
-# Sahifa sarlavhasi
-st.set_page_config(page_title="Mening Birinchi Ilovam", page_icon="🚀")
+st.set_page_config(layout="wide")
+st.title("Google Earth Engine + Streamlit Xaritasi 🌍")
 
-st.title("Xush kelibsiz! 👋")
-st.write("Bu mening Streamlit orqali yaratilgan birinchi dasturim.")
+# GEE xizmatiga ulanish (Avtomatlashtirilgan)
+try:
+    ee.Initialize()
+except Exception as e:
+    st.error("GEE autentifikatsiya xatosi. 'Secrets' qismini tekshiring.")
 
-# Oddiy jadval yaratish
-st.header("Tasodifiy ma'lumotlar jadvali")
-data = pd.DataFrame(
-    np.random.randn(10, 3),
-    columns=['A ustun', 'B ustun', 'C ustun']
-)
-st.dataframe(data)
+# Xarita yaratish
+m = geemap.Map(center=[41.31, 69.24], zoom=6) # Toshkent markazi
 
-# Grafika chizish
-st.header("Grafik ko'rinishi")
-st.line_chart(data)
+# GEE ma'lumotlar to'plamini qo'shish (Masalan: ESA Yer qoplami)
+dataset = ee.ImageCollection("ESA/WorldCover/v100").first()
+visualization = {'bands': ['Map']}
+m.addLayer(dataset, visualization, 'Yer qoplami (ESA)')
 
-# Foydalanuvchi bilan aloqa
-ismlar = st.text_input("Ismingizni kiriting:")
-if ismlar:
-    st.success(f"Salom, {ismlar}! Ilova muvaffaqiyatli ishlamoqda.")
+# Xaritani Streamlit'da ko'rsatish
+m.to_streamlit(height=700)
